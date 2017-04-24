@@ -153,7 +153,7 @@ class UserHandler implements Runnable
 				 * vérification de l'état d'erreur du serverOutPW avec ajout
 				 * d'un warning au logger et break si c'est le cas.
 				 */
-                                serverOutPW.print(userInput);
+                                serverOutPW.println(userInput);
                                 if (serverOutPW.checkError()){
                                     logger.warning("error in serverOutPW");
                                 }
