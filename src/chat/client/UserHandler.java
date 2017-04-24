@@ -8,6 +8,9 @@ import java.io.PrintWriter;
 import java.util.logging.Logger;
 
 import chat.Failure;
+import chat.Vocabulary;
+import java.io.InputStreamReader;
+import java.util.logging.Level;
 import logger.LoggerFactory;
 
 /**
@@ -61,12 +64,7 @@ class UserHandler implements Runnable
 		if (in != null)
 		{
 			logger.info("UserHandler: creating user input buffered reader ... ");
-
-			/*
-			 * TODO Création du BufferedReader sur un InputStreamReader à partir
-			 * du flux d'entrée en provenance de l'utilisateur
-			 */
-			// userInBR = TODO Complete ...
+                        userInBR = new BufferedReader(new InputStreamReader(in));
 		}
 		else
 		{
@@ -89,6 +87,7 @@ class UserHandler implements Runnable
 			 * serveur (en mode autoflush)
 			 */
 			// serverOutPW = TODO Complete ...
+                        serverOutPW = new PrintWriter(out, true);
 		}
 		else
 		{
@@ -132,26 +131,22 @@ class UserHandler implements Runnable
 		 */
 		while (commonRun.booleanValue())
 		{
-			/*
-			 * TODO Lecture d'une ligne en provenance de l'utilisateur grâce
-			 * au userInBR. Si une IOException intervient - Ajout d'un
-			 * severe au logger - On quitte la boucle
-			 */
-			// userInput = TODO Complete ...
-
+                        try {
+                            userInput = userInBR.readLine();
+                        } catch (IOException ex) {
+                            logger.log(Level.SEVERE, "something happened :'(", ex);
+                            break;
+                        }
 			if (userInput != null)
 			{
-				/*
-				 * TODO Envoi du texte au serveur grâce au serverOutPW et
-				 * vérification de l'état d'erreur du serverOutPW avec ajout
-				 * d'un warning au logger et break si c'est le cas.
-				 */
-				// TODO serverOutPW...
-
-				/*
-				 * TODO Si la commande Vocabulary.byeCmd a été tapée par
-				 * l'utilisateur on quitte la boucle
-				 */
+                                serverOutPW.print(userInput);
+                                if (serverOutPW.checkError()){
+                                    logger.log(Level.WARNING,"error in serverOutPW");
+                                }
+                                       
+                                if(userInput.equals(Vocabulary.byeCmd)){
+                                    break;
+                                }  
 			}
 			else
 			{
