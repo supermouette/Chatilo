@@ -135,7 +135,7 @@ public class ChatClient implements Runnable
 		catch (UnknownHostException e)
 		{
 			/*
-			 * TODO Notez bien cette façon de faire, vous devrez la  reproduire
+			 * Notez bien cette façon de faire, vous devrez la  reproduire
 			 * par la suite
 			 */
 			logger.severe("ChatClient: " + Failure.UNKNOWN_HOST + ": " + host);
@@ -151,7 +151,7 @@ public class ChatClient implements Runnable
 		}
 
 		/*
-		 * TODO Obtention du flux de sortie vers le serveur (serverOut) à partir
+		 * Obtention du flux de sortie vers le serveur (serverOut) à partir
 		 * de la clientSocket.
 		 * avec utilisation du logger pour afficher la progression ou les erreurs
 		 * 	- logger.info("ChatClient: got client output stream to server"); si le serverOut est non null
@@ -162,7 +162,6 @@ public class ChatClient implements Runnable
 		serverOut = null;
 		try
 		{
-			// TODO serverOut = ...
                         serverOut = clientSocket.getOutputStream();
 			if (serverOut != null)
 			{
@@ -173,7 +172,7 @@ public class ChatClient implements Runnable
 				logger.severe("ChatClient: null server out" + Failure.CLIENT_INPUT_STREAM);
 				System.exit(Failure.CLIENT_OUTPUT_STREAM.toInteger());
 			}
-			//throw new IOException(); // TODO Remove this line when serverOut is obtained
+			//throw new IOException();
 		}
 		catch (IOException e)
 		{
@@ -183,7 +182,7 @@ public class ChatClient implements Runnable
 		}
 
 		/*
-		 * TODO Création PrintWriter temporaire sur le serverOut
+		 * Création PrintWriter temporaire sur le serverOut
 		 * (avec autoFlush): serverOutPW
 		 * et envoi de notre nom d'utilisateur au serveur (avec un println)
 		 * afin qu'il puisse créer un thread dédié à notre traitement
@@ -193,7 +192,7 @@ public class ChatClient implements Runnable
 		 */
 		if (serverOut != null)
 		{
-			// serverOutPW = // TODO Complete ...
+			
 			logger.info("ChatClient: sending name to server ... ");
 
 			serverOutPW.println(userName);
@@ -204,7 +203,7 @@ public class ChatClient implements Runnable
 		}
 
 		/*
-		 * TODO Obtention du flux d'entrée depuis le serveur (serverIn) à partir
+		 * Obtention du flux d'entrée depuis le serveur (serverIn) à partir
 		 * de la clientSocket.
 		 * Si une IOException
 		 * 	- ajout d'un "severe" au logger avec Failure.CLIENT_INPUT_STREAM
