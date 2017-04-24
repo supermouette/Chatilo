@@ -126,9 +126,6 @@ public class ChatClient implements Runnable
 		                                       parentLogger,
 		                                       parentLogger.getLevel());
 
-		/*
-		 * TODO Création de la socket vers host/port
-		 */
 		clientSocket = null;
 		try
 		{
@@ -216,8 +213,8 @@ public class ChatClient implements Runnable
 		serverIn = null;
 		try
 		{
-			// TODO serverIn = ...
-			throw new IOException(); // TODO Remove this line when serverIn is obtained
+			serverIn = clientSocket.getInputStream();
+			// throw new IOException();
 		}
 		catch (IOException e)
 		{
