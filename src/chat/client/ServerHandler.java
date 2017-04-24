@@ -186,11 +186,13 @@ class ServerHandler implements Runnable
 			 */
 			Message message = null;
 			try {
-				message = new Message(serverInOS.readUTF());
+				message = new Message(serverInOS.readLine());
+                                System.out.print(message.toString());
 			}
 			catch (IOException e) {
-				logger.log(Level.SEVERE, "couldn't read message", e);
-				break;
+				logger.severe("couldn't read message" + Failure.CLIENT_CONNECTION);
+                                logger.severe(e.getLocalizedMessage());
+                                break;
 			}
 			
 			if ((message != null))
