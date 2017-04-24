@@ -194,7 +194,7 @@ public class ChatClient implements Runnable
 		{
 			
 			logger.info("ChatClient: sending name to server ... ");
-
+                        serverOutPW = new PrintWriter(serverOut,true);
 			serverOutPW.println(userName);
 			if (serverOutPW.checkError())
 			{

@@ -120,10 +120,14 @@ class ServerHandler implements Runnable
 			 */
 			userOutType = outType;
 			switch (userOutType)
-			{
+                        {
 				case OBJECT:
 					userOutPW = null;
-					userOutOS = new ObjectOutputStream(out);
+                                        try {
+                                            userOutOS = new ObjectOutputStream(out);
+                                        } catch (IOException ex) {
+                                            logger.log(Level.SEVERE, null, ex);
+                                        }
 					break;
 				case TEXT:
 				default:
@@ -202,7 +206,11 @@ class ServerHandler implements Runnable
 				switch (userOutType)
 				{
 					case OBJECT:
-						userOutOS.writeObject(message);
+                                            try {
+                                                userOutOS.writeObject(message);
+                                            } catch (IOException ex) {
+                                                logger.log(Level.SEVERE, null, ex);
+                                            }
 						error = true;
 						break; // Break this switch
 					case TEXT:
