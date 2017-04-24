@@ -2,10 +2,12 @@ package chat.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import chat.Failure;
@@ -83,11 +85,20 @@ class ServerHandler implements Runnable
 		{
 			logger.info("ServerHandler: creating server input reader ... ");
 			/*
-			 * TODO Création du ObjectInputStream à partir du flux d'entrée
+			 * Création du ObjectInputStream à partir du flux d'entrée
 			 * en provenance du serveur, si une IOException survient,
 			 * on quitte avec la valeur Failure.CLIENT_INPUT_STREAM
 			 */
-			serverInOS = null;
+			try
+			{
+				serverInOS = new ObjectInputStream(in);
+			}
+			catch (IOException e)
+			{
+				logger.severe("ChatClient: " + Failure.CLIENT_INPUT_STREAM);
+				logger.severe(e.getLocalizedMessage());
+				System.exit(Failure.CLIENT_INPUT_STREAM.toInteger());
+			}
 		}
 		else
 		{
@@ -104,7 +115,7 @@ class ServerHandler implements Runnable
 		{
 			logger.info("ServerHandler: creating user output ... ");
 			/*
-			 * TODO En fonction du outType, création d'un PrintWriter sur le
+			 * En fonction du outType, création d'un PrintWriter sur le
 			 * flux de sortie vers l'utilisateur, ou bien d'un ObjectOutputStream
 			 */
 			userOutType = outType;
@@ -112,12 +123,12 @@ class ServerHandler implements Runnable
 			{
 				case OBJECT:
 					userOutPW = null;
-					// userOutOS = TODO Complete ...
+					userOutOS = new ObjectOutputStream(out);
 					break;
 				case TEXT:
 				default:
 					userOutOS = null;
-					// userOutPW = TODO Complete ...
+					userOutPW = new PrintWriter(out);
 					break;
 			}
 		}
@@ -164,17 +175,24 @@ class ServerHandler implements Runnable
 		while (commonRun.booleanValue())
 		{
 			/*
-			 * TODO lecture d'un message du serveur avec le serverInOS
+			 * lecture d'un message du serveur avec le serverInOS
 			 * Si une Exception intervient
 			 * 	- Ajout d'un warning au logger
 			 * 	- on quitte la boucle while (commonRun...
 			 */
 			Message message = null;
-
+			try {
+				message = new Message(serverInOS.readLine());
+			}
+			catch (IOException e) {
+				logger.log(Level.SEVERE, "couldn't read message", e);
+				break;
+			}
+			
 			if ((message != null))
 			{
 				/*
-				 * TODO Affichage du message vers l'utilisateur avec
+				 * Affichage du message vers l'utilisateur avec
 				 * 	- le userOutPW si le client attends du texte
 				 * 	- le userOutOS si le client attends des objet (des Message)
 				 * vérification de l'état d'erreur du userOutPW
@@ -184,12 +202,15 @@ class ServerHandler implements Runnable
 				switch (userOutType)
 				{
 					case OBJECT:
-						// TODO userOutOS...
+						userOutOS.writeObject(message);
 						error = true;
 						break; // Break this switch
 					case TEXT:
 					default:
-						// TODO userOutPW...
+						userOutPW.print(message);
+						if (userOutPW.checkError()){
+                            logger.log(Level.WARNING,"error in userOutPW");
+                        }
 						error = true;
 						break;
 				}
