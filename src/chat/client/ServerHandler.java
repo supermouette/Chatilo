@@ -186,14 +186,16 @@ class ServerHandler implements Runnable
 			 */
 			Message message = null;
 			try {
-				message = new Message(serverInOS.readLine());
-                                System.out.print(message.toString());
+				message = (Message)serverInOS.readObject();
+                                //System.out.print(message.toString());
 			}
 			catch (IOException e) {
 				logger.severe("couldn't read message" + Failure.CLIENT_CONNECTION);
                                 logger.severe(e.getLocalizedMessage());
                                 break;
-			}
+			} catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 			
 			if ((message != null))
 			{
@@ -212,16 +214,18 @@ class ServerHandler implements Runnable
                                                 userOutOS.writeObject(message);
                                             } catch (IOException ex) {
                                                 logger.log(Level.SEVERE, null, ex);
+                                                error = true;
                                             }
-						error = true;
+						
 						break; // Break this switch
 					case TEXT:
 					default:
-						userOutPW.print(message);
+						userOutPW.println(message);
 						if (userOutPW.checkError()){
-                            logger.log(Level.WARNING,"error in userOutPW");
-                        }
-						error = true;
+                                                    logger.log(Level.WARNING,"error in userOutPW");
+                                                    error = true;
+                                                }
+						
 						break;
 				}
 				if (error)

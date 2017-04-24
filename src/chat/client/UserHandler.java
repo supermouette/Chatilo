@@ -154,6 +154,7 @@ class UserHandler implements Runnable
 				 * d'un warning au logger et break si c'est le cas.
 				 */
                                 serverOutPW.println(userInput);
+                                
                                 if (serverOutPW.checkError()){
                                     logger.warning("error in serverOutPW");
                                 }
