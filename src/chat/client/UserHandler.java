@@ -143,7 +143,7 @@ class UserHandler implements Runnable
                         try {
                             userInput = userInBR.readLine();
                         } catch (IOException ex) {
-                            logger.log(Level.SEVERE, "something happened :'(", ex);
+                            logger.severe("impossible to read input : "+ex);
                             break;
                         }
 			if (userInput != null)
@@ -155,7 +155,7 @@ class UserHandler implements Runnable
 				 */
                                 serverOutPW.print(userInput);
                                 if (serverOutPW.checkError()){
-                                    logger.log(Level.WARNING,"error in serverOutPW");
+                                    logger.warning("error in serverOutPW");
                                 }
                                        
                                 if(userInput.equals(Vocabulary.byeCmd)){
