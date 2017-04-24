@@ -1,0 +1,44 @@
+Réponses aux question de la partie UML : 
+
+- A quoi sert la classe AbstractRunChat ?
+
+	Cela sert à factoriser le code commun entre RunChatServer et RunChatClient.
+
+- Expliquez la relation ChatServer / InputOutputClient concrétisée par l’attribut « clients ».
+
+	Un Chatserver est composé de 0 à n InputOutputClient.
+	Un InputOutputClient n'est lié qu'à un seul ChatServer au long de son cycle de vie. Si on détruit le ChatServer, on devra détruire tous les InputOutputClient lié à celui-ci.
+
+- Expliquez la relation ClientHandler / InputClient concrétisée par l’attribut « mainClient ».
+	Un CLientHandler voit 0 ou 1 InputClient (en tant que mainClient).
+	Le mainClient pourra changer au cours de l'exécution.
+
+
+- Expliquez la relation ClientHandler / InputOutputClient concrétisée par l’attribut « allClients ».
+	L'attribut allClients contiendra de 1 à n InputOutputClient, cette liste sera dynamique.
+
+
+- Combien de threads tournent sur un serveur dans le scénario présenté par la Figure 1 (page 1) ? 
+  Le serveur commence par lancer le thread principal. Puis le serveur lance un client par thread.
+	Il y a donc trois threads.
+	RunChatServeur -> ChatServer
+	ChatServer -> CLientHandler
+	ChatServer -> CLientHandler
+
+- Combien de threads tournent dans le Client 1 du scénario présenté par la Figure 1 (page 1) ?
+  
+
+	(RunChatClient -> guiThread) si gui (pas le cas ici)
+	RunChatClient -> ChatClient
+	ChatClient -> UserHandler (on attend que l'utilisateur tape un message)
+	ChatClient -> ServerHandler (on attend la réponse du serveur)
+
+	Cela fait 3 threads.
+
+
+- A quoi sert le threads[i].join() à la fin du run de ChatClient ?
+	join permet d'attendre la fin d'un thread.
+	Cela permet donc de finir la méthode quand les deux thread seront finis.
+
+- Que représente la classe ChatClient dans le cadre d’une architecture MVC ?
+	Il s'agit du modèle. La vue étant RunChatClient, ou bien plus tard le client graphique, et  ServerHandler et UserHandler étant les controleurs qui s'occupe de transmettre l'information de la vue au modèle.
