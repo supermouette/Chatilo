@@ -166,6 +166,7 @@ public class ChatClient implements Runnable
 		try
 		{
 			// TODO serverOut = ...
+                        serverOut = clientSocket.getOutputStream();
 			if (serverOut != null)
 			{
 				logger.info("ChatClient: got client output stream to server");
@@ -175,7 +176,7 @@ public class ChatClient implements Runnable
 				logger.severe("ChatClient: null server out" + Failure.CLIENT_INPUT_STREAM);
 				System.exit(Failure.CLIENT_OUTPUT_STREAM.toInteger());
 			}
-			throw new IOException(); // TODO Remove this line when serverOut is obtained
+			//throw new IOException(); // TODO Remove this line when serverOut is obtained
 		}
 		catch (IOException e)
 		{

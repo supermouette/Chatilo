@@ -131,7 +131,6 @@ public class RunChatServer extends AbstractRunChat
 		{
 			serverThread = new Thread(server);
 			serverThread.start();
-
 			logger.info("Waiting for server to terminate ... ");
 			try
 			{
