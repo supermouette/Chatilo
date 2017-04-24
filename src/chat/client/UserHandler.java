@@ -63,6 +63,10 @@ class UserHandler implements Runnable
 		 */
 		if (in != null)
 		{
+                        /*
+			 * TODO Création du BufferedReader sur un InputStreamReader à partir
+			 * du flux d'entrée en provenance de l'utilisateur
+			 */
 			logger.info("UserHandler: creating user input buffered reader ... ");
                         userInBR = new BufferedReader(new InputStreamReader(in));
 		}
@@ -83,10 +87,9 @@ class UserHandler implements Runnable
 			logger.info("UserHandler: creating server output print writer ... ");
 
 			/*
-			 * TODO Création du PrintWriter sur le flux de sortie vers le
+			 * Création du PrintWriter sur le flux de sortie vers le
 			 * serveur (en mode autoflush)
 			 */
-			// serverOutPW = TODO Complete ...
                         serverOutPW = new PrintWriter(out, true);
 		}
 		else
@@ -131,6 +134,12 @@ class UserHandler implements Runnable
 		 */
 		while (commonRun.booleanValue())
 		{
+                    /*
+			 * Lecture d'une ligne en provenance de l'utilisateur grâce
+			 * au userInBR. Si une IOException intervient - Ajout d'un
+			 * severe au logger - On quitte la boucle
+			 */
+
                         try {
                             userInput = userInBR.readLine();
                         } catch (IOException ex) {
@@ -139,6 +148,11 @@ class UserHandler implements Runnable
                         }
 			if (userInput != null)
 			{
+                            /*
+				 * Envoi du texte au serveur grâce au serverOutPW et
+				 * vérification de l'état d'erreur du serverOutPW avec ajout
+				 * d'un warning au logger et break si c'est le cas.
+				 */
                                 serverOutPW.print(userInput);
                                 if (serverOutPW.checkError()){
                                     logger.log(Level.WARNING,"error in serverOutPW");
@@ -150,6 +164,10 @@ class UserHandler implements Runnable
 			}
 			else
 			{
+                            /*
+				 * Si la commande Vocabulary.byeCmd a été tapée par
+				 * l'utilisateur on quitte la boucle
+				 */
 				logger.warning("UserHandler: null user input");
 				break;
 			}
