@@ -13,6 +13,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import widgets.AbstractClientFrame;
 import widgets.ClientFrame;
+import widgets.ClientFrame2;
 
 /**
  * Lanceur d'un client de chat.
@@ -252,10 +253,11 @@ public class RunChatClient extends AbstractRunChat
 			 * à customizer lorsrque vous aurez créé la classe
 			 * ClientFrame2
 			 */
-			if(gui == 1)
-				final ClientFrame frame = new ClientFrame(name, host, commonRun, logger);
-			else if(gui == 2)
-				final ClientFrame2 frame = new ClientFrame2(name, host, commonRun, logger);
+                        final AbstractClientFrame frame;
+			if(guiVersion == 1)
+				frame = new ClientFrame(name, host, commonRun, logger);
+			else if(guiVersion == 2)
+				frame = new ClientFrame2(name, host, commonRun, logger);
 
 
 			/*
