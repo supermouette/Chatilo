@@ -531,6 +531,10 @@ public class ClientFrame extends AbstractClientFrame
 			}
 			catch (IOException e)
 			{
+				synchronized (commonRun)
+				{
+					commonRun = Boolean.FALSE;
+				}
 				logger.warning("ClientFrame: I/O Error reading");
 				break;
 			}
@@ -545,8 +549,13 @@ public class ClientFrame extends AbstractClientFrame
 				}
 				catch (BadLocationException e)
 				{
+					synchronized (commonRun)
+					{
+						commonRun = Boolean.FALSE;
+					}
 					logger.warning("ClientFrame: write at bad location: "
 					    + e.getLocalizedMessage());
+					break;
 				}
 			}
 			else // messageIn == null
