@@ -253,10 +253,10 @@ public class RunChatClient extends AbstractRunChat
 			 * à customizer lorsrque vous aurez créé la classe
 			 * ClientFrame2
 			 */
-                        final AbstractClientFrame frame;
+            final AbstractClientFrame frame;
 			if(guiVersion == 1)
 				frame = new ClientFrame(name, host, commonRun, logger);
-			else if(guiVersion == 2)
+			else
 				frame = new ClientFrame2(name, host, commonRun, logger);
 
 
@@ -268,7 +268,7 @@ public class RunChatClient extends AbstractRunChat
 			 */
 			try
 			{
-                                userOut = new PipedOutputStream(frame.getInPipe()); 
+				userOut = new PipedOutputStream(frame.getInPipe()); 
 			}
 			catch (IOException e)
 			{

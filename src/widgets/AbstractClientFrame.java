@@ -133,7 +133,7 @@ public abstract class AbstractClientFrame extends JFrame implements Runnable
 			setTitle(name);
 		}
 
-		setPreferredSize(new Dimension(400, 200));
+		setPreferredSize(new Dimension(800, 400));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		document = null;
