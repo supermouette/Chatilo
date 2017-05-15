@@ -256,7 +256,7 @@ public class RunChatClient extends AbstractRunChat
                         final AbstractClientFrame frame;
 			if(guiVersion == 1)
 				frame = new ClientFrame(name, host, commonRun, logger);
-			else if(guiVersion == 2)
+                        else
 				frame = new ClientFrame2(name, host, commonRun, logger);
 
 

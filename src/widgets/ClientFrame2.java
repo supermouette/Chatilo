@@ -35,11 +35,14 @@ import javax.swing.text.DefaultCaret;
 import javax.swing.text.StyleConstants;
 
 import chat.Vocabulary;
+import java.io.ObjectInputStream;
+import java.util.logging.Level;
 import static javax.swing.Action.ACCELERATOR_KEY;
 import static javax.swing.Action.LARGE_ICON_KEY;
 import static javax.swing.Action.NAME;
 import static javax.swing.Action.SHORT_DESCRIPTION;
 import static javax.swing.Action.SMALL_ICON;
+import models.Message;
 
 /**
  * Fenêtre d'affichae de la version GUI texte du client de chat.
@@ -51,7 +54,7 @@ public class ClientFrame2 extends AbstractClientFrame
 	 * Lecteur de flux d'entrée. Lit les données texte du {@link #inPipe} pour
 	 * les afficher dans le {@link #document}
 	 */
-	private BufferedReader inBR;
+	private ObjectInputStream is;
 
 	/**
 	 * Le label indiquant sur quel serveur on est connecté
@@ -271,7 +274,7 @@ public class ClientFrame2 extends AbstractClientFrame
 			int pos2 = message.indexOf('>');
 			try
 			{
-				return new String(message.substring(pos1 + 2, pos2 - 1));
+				return new String(message.substring(pos1 + 1, pos2 - 1));
 			}
 			catch (IndexOutOfBoundsException iobe)
 			{
@@ -501,9 +504,12 @@ public class ClientFrame2 extends AbstractClientFrame
 	@Override
 	public void run()
 	{
-		inBR = new BufferedReader(new InputStreamReader(inPipe));
-
-		String messageIn;
+            try {
+                is = new ObjectInputStream(inPipe);
+            } catch (IOException ex) {
+                Logger.getLogger(ClientFrame2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+		Message messageIn;
 
 		while (commonRun.booleanValue())
 		{
@@ -532,7 +538,8 @@ public class ClientFrame2 extends AbstractClientFrame
 				/*
 				 * read from input (doit être bloquant)
 				 */
-				messageIn = inBR.readLine();
+				messageIn = (Message)is.readObject();
+                                System.out.println("salut");
 			}
 			catch (IOException e)
 			{
@@ -542,15 +549,16 @@ public class ClientFrame2 extends AbstractClientFrame
 				}
 				logger.warning("ClientFrame: I/O Error reading");
 				break;
-			}
-
+			}catch (ClassNotFoundException ex) {
+                            logger.severe(ex.toString());
+                        }
 			if (messageIn != null)
 			{
 				// Ajouter le message à la fin du document avec la couleur
 				// voulue
 				try
 				{
-					writeMessage(messageIn);
+					writeMessage(messageIn.toString());
 				}
 				catch (BadLocationException e)
 				{
@@ -591,7 +599,7 @@ public class ClientFrame2 extends AbstractClientFrame
 		logger.info("ClientFrame::cleanup: closing input buffered reader ... ");
 		try
 		{
-			inBR.close();
+			is.close();
 		}
 		catch (IOException e)
 		{
