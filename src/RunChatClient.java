@@ -9,6 +9,8 @@ import java.util.Vector;
 import chat.Failure;
 import chat.UserOutputType;
 import chat.client.ChatClient;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import widgets.AbstractClientFrame;
 import widgets.ClientFrame;
 
@@ -260,8 +262,7 @@ public class RunChatClient extends AbstractRunChat
 			 */
 			try
 			{
-				// userOut = TODO Complete ...
-				throw new IOException(); // TODO Remove when done
+                                userOut = new PipedOutputStream(frame.getInPipe()); 
 			}
 			catch (IOException e)
 			{
@@ -279,8 +280,7 @@ public class RunChatClient extends AbstractRunChat
 			 */
 			try
 			{
-				// userIn = TODO Complete ...
-				throw new IOException(); // TODO Remove when done
+				userIn = new PipedInputStream(frame.getOutPipe());
 			}
 			catch (IOException e)
 			{
