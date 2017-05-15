@@ -249,13 +249,17 @@ public class RunChatClient extends AbstractRunChat
 
 			/*
 			 * Création de la fenêtre de chat
-			 * TODO à customizer lorsrque vous aurez créé la classe
+			 * à customizer lorsrque vous aurez créé la classe
 			 * ClientFrame2
 			 */
-			final AbstractClientFrame frame = new ClientFrame(name, host, commonRun, logger);
+			if(gui == 1)
+				final ClientFrame frame = new ClientFrame(name, host, commonRun, logger);
+			else if(gui == 2)
+				final ClientFrame2 frame = new ClientFrame2(name, host, commonRun, logger);
+
 
 			/*
-			 * TODO Création du flux de sortie vers le GUI : userOut à partir du
+			 * Création du flux de sortie vers le GUI : userOut à partir du
 			 * flux d'entrée de la frame (ClientFrame#getInPipe())
 			 * 	- Creation d'un PipedOutputStream à connecter sur
 			 * 	- le PipedInputStream de la frame
