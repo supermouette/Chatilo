@@ -373,6 +373,9 @@ public class ClientFrame2 extends AbstractClientFrame
 
 		sb.append(message);
 		sb.append(Vocabulary.newLine);
+		
+		// ajout de l'utilisateur à la liste des utilisateurs
+		users.addElement(parseName(message));
 
 		// source et contenu du message avec la couleur du message
 		String source = parseName(message);
@@ -841,7 +844,7 @@ public class ClientFrame2 extends AbstractClientFrame
 
 		public void actionPerformed(ActionEvent e)
 		{
-			//output.append("Remove action triggered for indexes : ");
+			output.append("Remove action triggered for indexes : ");
 			
 			int minIndex = selectionModel.getMinSelectionIndex();
 			int maxIndex = selectionModel.getMaxSelectionIndex();
@@ -850,16 +853,16 @@ public class ClientFrame2 extends AbstractClientFrame
 			{
 				if (selectionModel.isSelectedIndex(i))
 				{
-					//output.append(" " + i);
+					output.append(" " + i);
 					toRemove.push(new Integer(i));
 				}
 			}
-			//output.append(newline);
+			output.append(newline);
 			while (!toRemove.isEmpty())
 			{
 				int index = toRemove.pop().intValue();
-				//output.append("removing element: "
-					//+ users.getElementAt(index) + newline);
+				output.append("removing element: "
+					+ users.getElementAt(index) + newline);
 				users.remove(index);
 			}
 		}
@@ -878,7 +881,7 @@ public class ClientFrame2 extends AbstractClientFrame
 
 		public void actionPerformed(ActionEvent e)
 		{
-			//output.append("Clear selection action triggered" + newline);
+			output.append("Clear selection action triggered" + newline);
 			selectionModel.clearSelection();
 		}
 	}
