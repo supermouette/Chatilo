@@ -53,7 +53,13 @@ import javax.swing.text.StyleConstants;
 
 import chat.Vocabulary;
 import java.io.ObjectInputStream;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import static javax.swing.Action.ACCELERATOR_KEY;
 import static javax.swing.Action.LARGE_ICON_KEY;
 import static javax.swing.Action.NAME;
@@ -144,6 +150,9 @@ public class ClientFrame2 extends AbstractClientFrame
 	 */
 	private final Action addAction = new AddAction();
 
+        
+        private ArrayList<Message> messages;
+        
 	/**
 	 * Constructeur de la fenêtre
 	 * @param name le nom de l'utilisateur
@@ -342,10 +351,20 @@ public class ClientFrame2 extends AbstractClientFrame
 		document = textPane.getStyledDocument();
 		documentStyle = textPane.addStyle("New Style", null);
 		defaultColor = StyleConstants.getForeground(documentStyle);
-
+                
+                messages = new ArrayList<>();
+                Message.addOrder(Message.MessageOrder.DATE);
 
 	}
 
+        private void displayMessages() throws BadLocationException{
+            document.remove(0, document.getLength());
+            Collections.sort(messages);
+            for(Message m : messages){
+                writeMessage(m);
+            }
+        }
+        
 	/**
 	 * Affichage d'un message dans le {@link #document}, puis passage à la ligne
 	 * (avec l'ajout de {@link Vocabulary#newLine})
@@ -365,23 +384,46 @@ public class ClientFrame2 extends AbstractClientFrame
 	 * @see javax.swing.text.StyledDocument#insertString(int, String,
 	 * javax.swing.text.AttributeSet)
 	 */
-	protected void writeMessage(String message) throws BadLocationException
+	protected void writeMessage(Message message) throws BadLocationException
 	{
 		/*
 		 * ajout du message "[yyyy/MM/dd HH:mm:ss] utilisateur > message" à
 		 * la fin du document avec la couleur déterminée d'après "utilisateur"
 		 * (voir AbstractClientFrame#getColorFromName)
 		 */
-		StringBuffer sb = new StringBuffer();
-
-		sb.append(message);
-		sb.append(Vocabulary.newLine);
 		
 		// ajout de l'utilisateur à la liste des utilisateurs
-		users.addElement(parseName(message));
-
+                if(message.hasAuthor()){
+                    if(users.size()==0){
+                        users.addElement(message.getAuthor());
+                    } 
+                    else if(!users.contains(message.getAuthor())){
+                        Collator c = Collator.getInstance();
+                        c.setStrength(Collator.PRIMARY);
+                        int i;
+                        for(i=0;i<users.size();i++){
+                            if(c.compare(message.getAuthor(),users.get(i))<0){
+                                users.insertElementAt(message.getAuthor(), i);
+                                break;
+                            }
+                            if(i==users.size()-1){
+                                users.addElement(message.getAuthor());
+                                break;
+                            }
+                        }
+                    }
+                }
+                else{
+                    Pattern p = Pattern.compile("(.*) logged out$");
+                    Matcher m = p.matcher(message.getContent());
+                    if(m.matches()){
+                        users.removeElement(m.group(1));
+                    }
+                }
+                
 		// source et contenu du message avec la couleur du message
-		String source = parseName(message);
+
+                String source = message.getAuthor();
 		if ((source != null) && (source.length() > 0))
 		{
 			/*
@@ -392,78 +434,12 @@ public class ClientFrame2 extends AbstractClientFrame
 		}
 
 		document.insertString(document.getLength(),
-		                      sb.toString(),
+                                      message.toString()+"\n",
 		                      documentStyle);
 
 		// Retour à la couleur de texte par défaut
 		StyleConstants.setForeground(documentStyle, defaultColor);
 
-	}
-
-	/**
-	 * Recherche du nom d'utilisateur dans un message de type
-	 * "utilisateur > message".
-	 * parseName est utilisé pour extraire le nom d'utilisateur d'un message
-	 * afin d'utiliser le hashCode de ce nom pour créer une couleur dans
-	 * laquelle
-	 * sera affiché le message de cet utilisateur (ainsi tous les messages d'un
-	 * même utilisateur auront la même couleur).
-	 * @param message le message à parser
-	 * @return le nom d'utilisateur s'il y en a un sinon null
-	 */
-	protected String parseName(String message)
-	{
-		/*
-		 * renvoyer la chaine correspondant à la partie "utilisateur" dans
-		 * un message contenant "utilisateur > message", ou bien null si cette
-		 * partie n'existe pas.
-		 */
-		if (message.contains(">") && message.contains("]"))
-		{
-			int pos1 = message.indexOf(']');
-			int pos2 = message.indexOf('>');
-			try
-			{
-				return new String(message.substring(pos1 + 1, pos2 - 1));
-			}
-			catch (IndexOutOfBoundsException iobe)
-			{
-				logger.warning("ClientFrame::parseName: index out of bounds");
-				return null;
-			}
-		}
-		else
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * Recherche du contenu du message dans un message de type
-	 * "utilisateur > message"
-	 * @param message le message à parser
-	 * @return le contenu du message s'il y en a un sinon null
-	 */
-	protected String parseContent(String message)
-	{
-		if (message.contains(">"))
-		{
-			int pos = message.indexOf('>');
-			try
-			{
-				return new String(message.substring(pos + 1, message.length()));
-			}
-			catch (IndexOutOfBoundsException iobe)
-			{
-				logger
-				    .warning("ClientFrame::parseContent: index out of bounds");
-				return null;
-			}
-		}
-		else
-		{
-			return message;
-		}
 	}
 
 	/**
@@ -505,6 +481,7 @@ public class ClientFrame2 extends AbstractClientFrame
 			try
 			{
 				document.remove(0, document.getLength());
+                                messages.clear();
 			}
 			catch (BadLocationException ex)
 			{
@@ -688,7 +665,6 @@ public class ClientFrame2 extends AbstractClientFrame
 				 * read from input (doit être bloquant)
 				 */
 				messageIn = (Message)is.readObject();
-                                System.out.println("salut");
 			}
 			catch (IOException e)
 			{
@@ -707,7 +683,9 @@ public class ClientFrame2 extends AbstractClientFrame
 				// voulue
 				try
 				{
-					writeMessage(messageIn.toString());
+                                    messages.add(messageIn);
+                                    displayMessages();
+                                    //writeMessage(messageIn);
 				}
 				catch (BadLocationException e)
 				{
