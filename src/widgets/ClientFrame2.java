@@ -99,6 +99,7 @@ public class ClientFrame2 extends AbstractClientFrame
 	 * Actions à réaliser lorsque l'on veut effacer le contenu du document
 	 */
 	private final ClearAction clearAction;
+	private final ClearAction clearActionBtn;
 
 	/**
 	 * Actions à réaliser lorsque l'on veut envoyer un message au serveur
@@ -109,6 +110,19 @@ public class ClientFrame2 extends AbstractClientFrame
 	 * Actions à réaliser lorsque l'on veut envoyer un message au serveur
 	 */
 	protected final QuitAction quitAction;
+	protected final QuitAction quitActionBtn;
+	
+	/**
+	 * Actions à réaliser lorsque l'on veut filtrer les messages des utilisateurs selectionnés
+	 */
+	private final FilterMessages filterMessages;
+	private final FilterMessages filterMessagesBtn;
+	
+	/**
+	 * Actions à réaliser lorsque l'on veut kick un utilisateur
+	 */
+	private final KickSelected kickSelected;
+	private final KickSelected kickSelectedBtn;
 
 	/**
 	 * Référence à la fenêtre courante (à utiliser dans les classes internes)
@@ -133,25 +147,14 @@ public class ClientFrame2 extends AbstractClientFrame
 	 * la JList qui affiche ces éléments.
 	 */
 	private ListSelectionModel selectionModel = null;
-	
-	/**
-	 * Action à réaliser lorsque l'on souhaite supprimer les éléments
-	 * sélectionnnés de la liste
-	 */
-	private final Action removeAction = new RemoveItemAction();
 
 	/**
-	 * Action à réaliser lorsque l'on souhaite déselctionner tous les élements de la liste
+	 * Action à réaliser lorsque l'on souhaite déselectionner tous les élements de la liste
 	 */
-	private final Action clearSelectionAction = new ClearSelectionAction();
+	private final Action clearSelectionAction = new ClearSelectionAction("Clear selection");
+	private final Action clearSelectionActionBtn = new ClearSelectionAction("");
 
-	/**
-	 * Action à réaliser lorsque l'on souhaite ajouter un élément à la liste
-	 */
-	private final Action addAction = new AddAction();
-
-        
-        private ArrayList<Message> messages;
+    private ArrayList<Message> messages;
         
 	/**
 	 * Constructeur de la fenêtre
@@ -184,9 +187,15 @@ public class ClientFrame2 extends AbstractClientFrame
 		// --------------------------------------------------------------------
 
 		sendAction = new SendAction();
-		clearAction = new ClearAction();
-		quitAction = new QuitAction();
-
+		clearActionBtn = new ClearAction("");
+		clearAction = new ClearAction("Clear messages");
+		quitAction = new QuitAction("Quit");
+		quitActionBtn = new QuitAction("");
+		filterMessages = new FilterMessages("Filter messages");
+		filterMessagesBtn = new FilterMessages("");
+		kickSelected = new KickSelected("Kick selected");
+		kickSelectedBtn = new KickSelected("");
+		
 
 		/*
 		 * Ajout d'un listener pour fermer correctement l'application lorsque
@@ -202,10 +211,6 @@ public class ClientFrame2 extends AbstractClientFrame
 		leftPanel.setPreferredSize(new Dimension(200, 10));
 		getContentPane().add(leftPanel, BorderLayout.WEST);
 		leftPanel.setLayout(new BorderLayout(0, 0));
-		
-		JButton btnClearSelection = new JButton("Clear Selection");
-		btnClearSelection.setAction(clearSelectionAction);
-		leftPanel.add(btnClearSelection, BorderLayout.NORTH);
 
 		JScrollPane listScrollPane = new JScrollPane();
 		leftPanel.add(listScrollPane, BorderLayout.CENTER);
@@ -225,12 +230,11 @@ public class ClientFrame2 extends AbstractClientFrame
 		JPopupMenu popupMenu = new JPopupMenu();
 		addPopup(list, popupMenu);
 
-		JMenuItem mntmAdd = new JMenuItem(addAction);
-		mntmAdd.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.META_MASK));
-		popupMenu.add(mntmAdd);
+		JMenuItem mntmClear = new JMenuItem(clearSelectionActionBtn);
+		popupMenu.add(mntmClear);
 
-		JMenuItem mntmRemove = new JMenuItem(removeAction);
-		popupMenu.add(mntmRemove);
+		JMenuItem mntmKick = new JMenuItem(kickSelected);
+		popupMenu.add(mntmKick);
 
 		JSeparator separator = new JSeparator();
 		popupMenu.add(separator);
@@ -259,13 +263,11 @@ public class ClientFrame2 extends AbstractClientFrame
 
 					if (lsm.isSelectionEmpty())
 					{
-						removeAction.setEnabled(false);
 						clearSelectionAction.setEnabled(false);
 						output.append(" <none>");
 					}
 					else
 					{
-						removeAction.setEnabled(true);
 						clearSelectionAction.setEnabled(true);
 						// Find out which indexes are selected.
 						int minIndex = lsm.getMinSelectionIndex();
@@ -292,11 +294,20 @@ public class ClientFrame2 extends AbstractClientFrame
 		toolBar.setFloatable(false);
 		getContentPane().add(toolBar, BorderLayout.NORTH);
 
-		JButton quitButton = new JButton(quitAction);
+		JButton quitButton = new JButton(quitActionBtn);
 		toolBar.add(quitButton);
+		
+		JButton clearSelBtn = new JButton(clearSelectionActionBtn);
+		toolBar.add(clearSelBtn);
+		
+		JButton kickSelBtn = new JButton(kickSelectedBtn);
+		toolBar.add(kickSelBtn);
 
-		JButton clearButton = new JButton(clearAction);
-		toolBar.add(clearButton);
+		JButton clearBtn = new JButton(clearActionBtn);
+		toolBar.add(clearBtn);
+		
+		JButton filterMessBtn = new JButton(filterMessagesBtn);
+		toolBar.add(filterMessagesBtn);
 
 		Component toolBarSep = Box.createHorizontalGlue();
 		toolBar.add(toolBarSep);
@@ -329,19 +340,30 @@ public class ClientFrame2 extends AbstractClientFrame
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
-		JMenu actionsMenu = new JMenu("Actions");
-		menuBar.add(actionsMenu);
+		JMenu connectionsMenu = new JMenu("Connections");
+		menuBar.add(connectionsMenu);
 
-		JMenuItem sendMenuItem = new JMenuItem(sendAction);
-		actionsMenu.add(sendMenuItem);
+		JMenuItem quitConnectionsMenuItem = new JMenuItem(quitAction);
+		connectionsMenu.add(quitConnectionsMenuItem);
+		
+		JMenu messageMenu = new JMenu("Messages");
+		menuBar.add(messageMenu);
+		
+		JMenuItem clearMessagesMenuItem = new JMenuItem(clearAction);
+		messageMenu.add(clearMessagesMenuItem);
+		
+		JMenuItem filterMessagesMenuItem = new JMenuItem(filterMessages);
+		messageMenu.add(filterMessagesMenuItem);
+		
+		JMenu usersMenu = new JMenu("Users");
+		menuBar.add(usersMenu);
+		
+		JMenuItem clearSelectedMenuItem = new JMenuItem(clearSelectionAction);
+		usersMenu.add(clearSelectedMenuItem);
+		
+		JMenuItem kickSelectedMenuItem = new JMenuItem(kickSelected);
+		usersMenu.add(kickSelectedMenuItem);
 
-		JMenuItem clearMenuItem = new JMenuItem(clearAction);
-		actionsMenu.add(clearMenuItem);
-
-		actionsMenu.add(separator);
-
-		JMenuItem quitMenuItem = new JMenuItem(quitAction);
-		actionsMenu.add(quitMenuItem);
 
 		// --------------------------------------------------------------------
 		// Documents
@@ -352,7 +374,7 @@ public class ClientFrame2 extends AbstractClientFrame
 		documentStyle = textPane.addStyle("New Style", null);
 		defaultColor = StyleConstants.getForeground(documentStyle);
                 
-                messages = new ArrayList<>();
+                messages = new ArrayList<Message>();
                 Message.addOrder(Message.MessageOrder.DATE);
 
 	}
@@ -453,7 +475,7 @@ public class ClientFrame2 extends AbstractClientFrame
 		 * Constructeur d'une ClearAction : met en place le nom, la description,
 		 * le raccourci clavier et les small|Large icons de l'action
 		 */
-		public ClearAction()
+		public ClearAction(String name)
 		{
 			putValue(SMALL_ICON,
 			         new ImageIcon(ClientFrame.class
@@ -464,7 +486,7 @@ public class ClientFrame2 extends AbstractClientFrame
 			putValue(ACCELERATOR_KEY,
 			         KeyStroke.getKeyStroke(KeyEvent.VK_L,
 			                                InputEvent.META_MASK));
-			putValue(NAME, "Clear");
+			putValue(NAME, name);
 			putValue(SHORT_DESCRIPTION, "Clear document content");
 		}
 
@@ -557,7 +579,7 @@ public class ClientFrame2 extends AbstractClientFrame
 		 * Constructeur d'une QuitAction : met en place le nom, la description,
 		 * le raccourci clavier et les small|Large icons de l'action
 		 */
-		public QuitAction()
+		public QuitAction(String name)
 		{
 			putValue(SMALL_ICON,
 			         new ImageIcon(ClientFrame.class
@@ -568,7 +590,7 @@ public class ClientFrame2 extends AbstractClientFrame
 			putValue(ACCELERATOR_KEY,
 			         KeyStroke.getKeyStroke(KeyEvent.VK_Q,
 			                                InputEvent.META_MASK));
-			putValue(NAME, "Quit");
+			putValue(NAME, name);
 			putValue(SHORT_DESCRIPTION, "Disconnect from server and quit");
 		}
 
@@ -594,6 +616,146 @@ public class ClientFrame2 extends AbstractClientFrame
 			}
 
 			sendMessage(Vocabulary.byeCmd);
+		}
+	}
+	
+	/**
+	 * Action réalisée pour filtrer les messages pour les utilisateurs sélectionnés
+	 */
+	@SuppressWarnings("serial")
+	protected class FilterMessages extends AbstractAction
+	{
+		/**
+		 * Constructeur d'un filterMessages : met en place le nom, la description,
+		 * le raccourci clavier et les small|Large icons de l'action
+		 */
+		public FilterMessages(String name)
+		{
+			putValue(SMALL_ICON,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/filled_filter-16.png")));
+			putValue(LARGE_ICON_KEY,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/filled_filter-32.png")));
+			putValue(ACCELERATOR_KEY,
+			         KeyStroke.getKeyStroke(KeyEvent.VK_S,
+			                                InputEvent.META_MASK));
+			putValue(NAME, name);
+			putValue(SHORT_DESCRIPTION, "Filter messages by user selected");
+		}
+
+		/**
+		 * Opérations réalisées lorsque l'action est sollicitée
+		 * @param e évènement à l'origine de l'action
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		public void actionPerformed(ActionEvent e)
+		{	
+			// remove all messages from document
+			try {
+				document.remove(0, document.getLength());
+			} catch (BadLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			// get selected users
+			int minIndex = selectionModel.getMinSelectionIndex();
+			int maxIndex = selectionModel.getMaxSelectionIndex();
+			DefaultListModel<String> toRemove = new DefaultListModel<String>();
+			for (int i = minIndex; i <= maxIndex; i++)
+			{
+				if (selectionModel.isSelectedIndex(i))
+				{
+					toRemove.addElement(users.getElementAt(i).toString());
+				}
+			}
+			// display only the messages from selected users
+			for(Message m : messages){
+               if(toRemove.contains(m.getAuthor()))
+				try {
+					writeMessage(m);
+				} catch (BadLocationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}            	   
+            }
+		}
+	}
+	
+	/**
+	 * Action réalisée pour effacer la selection
+	 */
+	@SuppressWarnings("serial")
+	private class ClearSelectionAction extends AbstractAction
+	{
+		public ClearSelectionAction(String name)
+		{
+			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.META_MASK));
+			putValue(LARGE_ICON_KEY, new ImageIcon(ClientFrame2.class.getResource("/icons/delete_database-32.png")));
+			putValue(SMALL_ICON, new ImageIcon(ClientFrame2.class.getResource("/icons/delete_database-16.png")));
+			putValue(NAME, name);
+			putValue(SHORT_DESCRIPTION, "Unselect selected items");
+		}
+
+		public void actionPerformed(ActionEvent e)
+		{
+			output.append("Clear selection action triggered" + newline);
+			selectionModel.clearSelection();
+		}
+	}
+	
+	/**
+	 * Action réalisée pour kick les utilisateurs selectionnés
+	 */
+	@SuppressWarnings("serial")
+	protected class KickSelected extends AbstractAction
+	{
+		/**
+		 * Constructeur d'une SendAction : met en place le nom, la description,
+		 * le raccourci clavier et les small|Large icons de l'action
+		 */
+		public KickSelected(String name)
+		{
+			putValue(SMALL_ICON,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/remove_user-16.png")));
+			putValue(LARGE_ICON_KEY,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/remove_user-32.png")));
+			putValue(ACCELERATOR_KEY,
+			         KeyStroke.getKeyStroke(KeyEvent.VK_S,
+			                                InputEvent.META_MASK));
+			putValue(NAME, name);
+			putValue(SHORT_DESCRIPTION, "Kick selected user(s)");
+		}
+
+		/**
+		 * Opérations réalisées lorsque l'action est sollicitée
+		 * @param e évènement à l'origine de l'action
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		public void actionPerformed(ActionEvent e)
+		{
+			// get selected users
+			int minIndex = selectionModel.getMinSelectionIndex();
+			int maxIndex = selectionModel.getMaxSelectionIndex();
+			Stack<Integer> toRemove = new Stack<Integer>();
+			for (int i = minIndex; i <= maxIndex; i++)
+			{
+				if (selectionModel.isSelectedIndex(i))
+				{
+					toRemove.push(new Integer(i));
+				}
+			}
+			
+			while (!toRemove.isEmpty())
+			{
+				int index = toRemove.pop().intValue();
+				output.append("removing element: "
+					+ users.getElementAt(index) + newline);
+				users.remove(index);
+			}
 		}
 	}
 
@@ -815,85 +977,5 @@ public class ClientFrame2 extends AbstractClientFrame
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}
 		});
-	}
-	
-	private class RemoveItemAction extends AbstractAction
-	{
-		public RemoveItemAction()
-		{
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.META_MASK));
-			putValue(SMALL_ICON, new ImageIcon(ClientFrame2.class.getResource("/examples/icons/remove_user-16.png")));
-			putValue(LARGE_ICON_KEY, new ImageIcon(ClientFrame2.class.getResource("/examples/icons/remove_user-32.png")));
-			putValue(NAME, "Remove");
-			putValue(SHORT_DESCRIPTION, "Removes item from list");
-		}
-
-		public void actionPerformed(ActionEvent e)
-		{
-			output.append("Remove action triggered for indexes : ");
-			
-			int minIndex = selectionModel.getMinSelectionIndex();
-			int maxIndex = selectionModel.getMaxSelectionIndex();
-			Stack<Integer> toRemove = new Stack<Integer>();
-			for (int i = minIndex; i <= maxIndex; i++)
-			{
-				if (selectionModel.isSelectedIndex(i))
-				{
-					output.append(" " + i);
-					toRemove.push(new Integer(i));
-				}
-			}
-			output.append(newline);
-			while (!toRemove.isEmpty())
-			{
-				int index = toRemove.pop().intValue();
-				output.append("removing element: "
-					+ users.getElementAt(index) + newline);
-				users.remove(index);
-			}
-		}
-	}
-
-	private class ClearSelectionAction extends AbstractAction
-	{
-		public ClearSelectionAction()
-		{
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.META_MASK));
-			putValue(LARGE_ICON_KEY, new ImageIcon(ClientFrame2.class.getResource("/examples/icons/delete_sign-32.png")));
-			putValue(SMALL_ICON, new ImageIcon(ClientFrame2.class.getResource("/examples/icons/delete_sign-16.png")));
-			putValue(NAME, "Clear selection");
-			putValue(SHORT_DESCRIPTION, "Unselect selected items");
-		}
-
-		public void actionPerformed(ActionEvent e)
-		{
-			output.append("Clear selection action triggered" + newline);
-			selectionModel.clearSelection();
-		}
-	}
-
-	private class AddAction extends AbstractAction
-	{
-		public AddAction()
-		{
-			putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.META_MASK));
-			putValue(SMALL_ICON, new ImageIcon(ClientFrame2.class.getResource("/examples/icons/add_user-16.png")));
-			putValue(LARGE_ICON_KEY, new ImageIcon(ClientFrame2.class.getResource("/examples/icons/add_user-32.png")));
-			putValue(NAME, "Add...");
-			putValue(SHORT_DESCRIPTION, "Add item");
-		}
-
-		public void actionPerformed(ActionEvent e)
-		{
-			output.append("Add action triggered" + newline);
-			String inputValue = JOptionPane.showInputDialog("New item name");
-			if (inputValue != null)
-			{
-				if (inputValue.length() > 0)
-				{
-					users.addElement(inputValue);
-				}
-			}
-		}
 	}
 }
