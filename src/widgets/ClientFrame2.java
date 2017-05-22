@@ -99,7 +99,6 @@ public class ClientFrame2 extends AbstractClientFrame
 	 * Actions à réaliser lorsque l'on veut effacer le contenu du document
 	 */
 	private final ClearAction clearAction;
-	private final ClearAction clearActionBtn;
 
 	/**
 	 * Actions à réaliser lorsque l'on veut envoyer un message au serveur
@@ -110,19 +109,16 @@ public class ClientFrame2 extends AbstractClientFrame
 	 * Actions à réaliser lorsque l'on veut envoyer un message au serveur
 	 */
 	protected final QuitAction quitAction;
-	protected final QuitAction quitActionBtn;
 	
 	/**
 	 * Actions à réaliser lorsque l'on veut filtrer les messages des utilisateurs selectionnés
 	 */
 	private final FilterMessages filterMessages;
-	private final FilterMessages filterMessagesBtn;
 	
 	/**
 	 * Actions à réaliser lorsque l'on veut kick un utilisateur
 	 */
 	private final KickSelected kickSelected;
-	private final KickSelected kickSelectedBtn;
 
 	/**
 	 * Référence à la fenêtre courante (à utiliser dans les classes internes)
@@ -187,14 +183,10 @@ public class ClientFrame2 extends AbstractClientFrame
 		// --------------------------------------------------------------------
 
 		sendAction = new SendAction();
-		clearActionBtn = new ClearAction("");
 		clearAction = new ClearAction("Clear messages");
 		quitAction = new QuitAction("Quit");
-		quitActionBtn = new QuitAction("");
 		filterMessages = new FilterMessages("Filter messages");
-		filterMessagesBtn = new FilterMessages("");
 		kickSelected = new KickSelected("Kick selected");
-		kickSelectedBtn = new KickSelected("");
 		
 
 		/*
@@ -294,20 +286,25 @@ public class ClientFrame2 extends AbstractClientFrame
 		toolBar.setFloatable(false);
 		getContentPane().add(toolBar, BorderLayout.NORTH);
 
-		JButton quitButton = new JButton(quitActionBtn);
+		JButton quitButton = new JButton(quitAction);
+		quitButton.setHideActionText(true);
 		toolBar.add(quitButton);
 		
-		JButton clearSelBtn = new JButton(clearSelectionActionBtn);
+		JButton clearSelBtn = new JButton(clearSelectionAction);
+		clearSelBtn.setHideActionText(true);
 		toolBar.add(clearSelBtn);
 		
-		JButton kickSelBtn = new JButton(kickSelectedBtn);
+		JButton kickSelBtn = new JButton(kickSelected);
+		kickSelBtn.setHideActionText(true);
 		toolBar.add(kickSelBtn);
 
-		JButton clearBtn = new JButton(clearActionBtn);
+		JButton clearBtn = new JButton(clearAction);
+		clearBtn.setHideActionText(true);
 		toolBar.add(clearBtn);
 		
-		JButton filterMessBtn = new JButton(filterMessagesBtn);
-		toolBar.add(filterMessagesBtn);
+		JButton filterMessBtn = new JButton(filterMessages);
+		filterMessBtn.setHideActionText(true);
+		toolBar.add(filterMessBtn);
 
 		Component toolBarSep = Box.createHorizontalGlue();
 		toolBar.add(toolBarSep);
@@ -903,7 +900,7 @@ public class ClientFrame2 extends AbstractClientFrame
 	 * Color Text renderer for drawing list's users in colored text
 	 * @author davidroussel
 	 */
-	public static class ColorTextRenderer extends JLabel
+	public class ColorTextRenderer extends JLabel
 		implements ListCellRenderer<String>
 	{
 		private Color color = null;
@@ -924,7 +921,7 @@ public class ClientFrame2 extends AbstractClientFrame
 			{
 				if (value.length() > 0)
 				{
-					color = new Color(value.hashCode()).darker();
+					color = getColorFromName(value);
 				}
 			}
 			setText(value);
