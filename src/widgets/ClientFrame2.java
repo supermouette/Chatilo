@@ -116,6 +116,21 @@ public class ClientFrame2 extends AbstractClientFrame
 	private final FilterMessages filterMessages;
 	
 	/**
+	 * Actions à réaliser lorsque l'on veut filtrer les messages par utilisateur
+	 */
+	private final SortAuthor sortAuthor;
+	
+	/**
+	 * Actions à réaliser lorsque l'on veut filtrer les messages par date
+	 */
+	private final SortDate sortDate;
+	
+	/**
+	 * Actions à réaliser lorsque l'on veut filtrer les messages par contenu
+	 */
+	private final SortContent sortContent;
+	
+	/**
 	 * Actions à réaliser lorsque l'on veut kick un utilisateur
 	 */
 	private final KickSelected kickSelected;
@@ -187,6 +202,9 @@ public class ClientFrame2 extends AbstractClientFrame
 		quitAction = new QuitAction("Quit");
 		filterMessages = new FilterMessages("Filter messages");
 		kickSelected = new KickSelected("Kick selected");
+		sortAuthor = new SortAuthor("By author");
+		sortDate = new SortDate("By date");
+		sortContent = new SortContent("By content");		
 		
 
 		/*
@@ -222,17 +240,11 @@ public class ClientFrame2 extends AbstractClientFrame
 		JPopupMenu popupMenu = new JPopupMenu();
 		addPopup(list, popupMenu);
 
-		JMenuItem mntmClear = new JMenuItem(clearSelectionActionBtn);
+		JMenuItem mntmClear = new JMenuItem(clearSelectionAction);
 		popupMenu.add(mntmClear);
 
 		JMenuItem mntmKick = new JMenuItem(kickSelected);
 		popupMenu.add(mntmKick);
-
-		JSeparator separator = new JSeparator();
-		popupMenu.add(separator);
-
-		JMenuItem mntmClearSelection = new JMenuItem(clearSelectionAction);
-		popupMenu.add(mntmClearSelection);
 		
 		selectionModel = list.getSelectionModel();
 		selectionModel.addListSelectionListener(new ListSelectionListener()
@@ -351,6 +363,23 @@ public class ClientFrame2 extends AbstractClientFrame
 		
 		JMenuItem filterMessagesMenuItem = new JMenuItem(filterMessages);
 		messageMenu.add(filterMessagesMenuItem);
+		
+		JSeparator separator = new JSeparator();
+		messageMenu.add(separator);
+		
+		JMenu subMenu = new JMenu("Sort");
+		subMenu.setMnemonic(KeyEvent.VK_S);
+
+		JMenuItem sortAuthorMenuItem = new JMenuItem(sortAuthor);
+		subMenu.add(sortAuthorMenuItem);
+		
+		JMenuItem sortDateMenuItem = new JMenuItem(sortDate);
+		subMenu.add(sortDateMenuItem);
+		
+		JMenuItem sortContentMenuItem = new JMenuItem(sortContent);
+		subMenu.add(sortContentMenuItem);
+		
+		messageMenu.add(subMenu);
 		
 		JMenu usersMenu = new JMenu("Users");
 		menuBar.add(usersMenu);
@@ -677,6 +706,162 @@ public class ClientFrame2 extends AbstractClientFrame
 					e1.printStackTrace();
 				}            	   
             }
+		}
+	}
+	
+	/**
+	 * Action réalisée pour filtrer les messages par utilisateur
+	 */
+	@SuppressWarnings("serial")
+	protected class SortAuthor extends AbstractAction
+	{
+		/**
+		 * Constructeur d'un filterMessages : met en place le nom, la description,
+		 * le raccourci clavier et les small|Large icons de l'action
+		 *  
+		 */
+		public SortAuthor(String name)
+		{
+			putValue(SMALL_ICON,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/filled_filter-16.png")));
+			putValue(LARGE_ICON_KEY,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/filled_filter-32.png")));
+			putValue(ACCELERATOR_KEY,
+			         KeyStroke.getKeyStroke(KeyEvent.VK_S,
+			                                InputEvent.META_MASK));
+			putValue(NAME, name);
+			putValue(SHORT_DESCRIPTION, "Filter messages by user");
+		}
+
+		/**
+		 * Opérations réalisées lorsque l'action est sollicitée
+		 * @param e évènement à l'origine de l'action
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		public void actionPerformed(ActionEvent e)
+		{	
+			// remove all messages from document
+			try {
+				document.remove(0, document.getLength());
+			} catch (BadLocationException e1) {
+				// Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			Message.clearOrders();
+			Message.addOrder(Message.MessageOrder.AUTHOR);
+			try {
+				displayMessages();
+			} catch (BadLocationException e1) {
+				// Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * Action réalisée pour filtrer les messages par date
+	 */
+	@SuppressWarnings("serial")
+	protected class SortDate extends AbstractAction
+	{
+		/**
+		 * Constructeur d'un filterMessages : met en place le nom, la description,
+		 * le raccourci clavier et les small|Large icons de l'action
+		 *  
+		 */
+		public SortDate(String name)
+		{
+			putValue(SMALL_ICON,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/filled_filter-16.png")));
+			putValue(LARGE_ICON_KEY,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/filled_filter-32.png")));
+			putValue(ACCELERATOR_KEY,
+			         KeyStroke.getKeyStroke(KeyEvent.VK_S,
+			                                InputEvent.META_MASK));
+			putValue(NAME, name);
+			putValue(SHORT_DESCRIPTION, "Filter messages by date");
+		}
+
+		/**
+		 * Opérations réalisées lorsque l'action est sollicitée
+		 * @param e évènement à l'origine de l'action
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		public void actionPerformed(ActionEvent e)
+		{	
+			// remove all messages from document
+			try {
+				document.remove(0, document.getLength());
+			} catch (BadLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			Message.clearOrders();
+			Message.addOrder(Message.MessageOrder.DATE);
+			try {
+				displayMessages();
+			} catch (BadLocationException e1) {
+				// Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * Action réalisée pour filtrer les messages par contenu
+	 */
+	@SuppressWarnings("serial")
+	protected class SortContent extends AbstractAction
+	{
+		/**
+		 * Constructeur d'un filterMessages : met en place le nom, la description,
+		 * le raccourci clavier et les small|Large icons de l'action
+		 *  
+		 */
+		public SortContent(String name)
+		{
+			putValue(SMALL_ICON,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/filled_filter-16.png")));
+			putValue(LARGE_ICON_KEY,
+			         new ImageIcon(ClientFrame.class
+			             .getResource("/icons/filled_filter-32.png")));
+			putValue(ACCELERATOR_KEY,
+			         KeyStroke.getKeyStroke(KeyEvent.VK_S,
+			                                InputEvent.META_MASK));
+			putValue(NAME, name);
+			putValue(SHORT_DESCRIPTION, "Filter messages by content");
+		}
+
+		/**
+		 * Opérations réalisées lorsque l'action est sollicitée
+		 * @param e évènement à l'origine de l'action
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		public void actionPerformed(ActionEvent e)
+		{	
+			// remove all messages from document
+			try {
+				document.remove(0, document.getLength());
+			} catch (BadLocationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			Message.clearOrders();
+			Message.addOrder(Message.MessageOrder.CONTENT);
+			try {
+				displayMessages();
+			} catch (BadLocationException e1) {
+				// Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 	
